@@ -11,7 +11,7 @@ pipeline {
     GITOPS_URL            = 'https://github.com/Enghour/product-service-cd.git'
     GITOPS_BRANCH         = 'main'
     GITOPS_DIR            = '.'
-    DEV_VALUES_FILE       = 'values-dev.yaml'
+    DEV_VALUES_FILE       = 'values.yaml'
     GITOPS_CREDENTIALS_ID = 'github-cred'
 
     // ---- Git commit identity ----
@@ -65,7 +65,7 @@ pipeline {
     //   }
     // }
 
-    stage('Update GitOps values-dev.yaml') {
+    stage('Update GitOps values.yaml') {
       steps {
         withCredentials([usernamePassword(
           credentialsId: "${GITOPS_CREDENTIALS_ID}",
