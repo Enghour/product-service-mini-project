@@ -131,16 +131,16 @@ pipeline {
     // ---- Docker image settings ----
     DOCKER_HUB_REPO           = 'keanghor31/spring-app01'
     DOCKER_HUB_CREDENTIALS_ID = 'dockerhub-cred'
-    BASE_VERSION              = '1.0'
+    BASE_VERSION              = '1.0.3'
 
     // ---- GitOps repo (Helm values) ----
     GITOPS_URL            = 'https://github.com/Enghour/product-service-cd.git'
     GITOPS_BRANCH         = 'main'
-    GITOPS_DIR            = 'gitops' // safer than '.'
-    DEV_VALUES_FILE       = 'values.yaml' // adjust if needed (e.g., envs/dev/values.yaml)
+    GITOPS_DIR            = 'gitops'
+    DEV_VALUES_FILE       = 'values.yaml'
     GITOPS_CREDENTIALS_ID = 'github-cred'
 
-    // ---- Git identity ----
+    // ---- Git commit identity ----
     GIT_USER_NAME         = 'Enghour'
     GIT_USER_EMAIL        = 'enghourh5@gmail.com'
   }
@@ -156,10 +156,12 @@ pipeline {
     stage('Build Spring Boot') {
       steps {
         sh '''
-          # ✅ Ensure Java 21 is used explicitly
+          # ✅ Use the installed system JDK 21 explicitly
           export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
-          echo "Using JAVA_HOME=$JAVA_HOME"
+          export PATH=$JAVA_HOME/bin:$PATH
+          export ORG_GRADLE_JAVA_INSTALLATIONS_PATHS=$JAVA_HOME
 
+          echo "✅ Using JAVA_HOME=$JAVA_HOME"
           chmod +x ./gradlew || true
           ./gradlew clean build -x test
         '''
@@ -169,11 +171,10 @@ pipeline {
     stage('Build & Push Docker image') {
       steps {
         script {
-          // 🏷 Generate 3-digit version like 1.0.13
-          def imageTag = "${BASE_VERSION}.${env.BUILD_NUMBER}"
+          def imageTag = "1.0.${env.BUILD_NUMBER}"
           env.IMAGE_TAG = imageTag
 
-          echo "📦 Building Docker image: ${DOCKER_HUB_REPO}:${imageTag}"
+          echo "📦 Building image: ${DOCKER_HUB_REPO}:${imageTag}"
           def img = docker.build("${DOCKER_HUB_REPO}:${imageTag}")
 
           echo "🚀 Pushing image to Docker Hub"
@@ -185,17 +186,6 @@ pipeline {
       }
     }
 
-    // Optional Trivy scan (can re-enable)
-    // stage('Trivy scan (image)') {
-    //   steps {
-    //     sh '''
-    //       docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image \
-    //         --severity HIGH,CRITICAL --no-progress --format table \
-    //         -o trivy-scan-report.txt "$DOCKER_HUB_REPO:$IMAGE_TAG" || echo "Trivy scan failed (non-blocking)"
-    //     '''
-    //   }
-    // }
-
     stage('Update GitOps values.yaml') {
       steps {
         withCredentials([usernamePassword(
@@ -204,7 +194,7 @@ pipeline {
           passwordVariable: 'GIT_TOKEN'
         )]) {
           sh '''
-            echo "🧹 Cleaning previous GitOps clone"
+            echo "🧹 Cleaning previous clone"
             rm -rf "$GITOPS_DIR"
 
             echo "📥 Cloning GitOps repo..."
@@ -216,7 +206,6 @@ pipeline {
             git config user.email "$GIT_USER_EMAIL"
 
             echo "📝 Updating image tag in $DEV_VALUES_FILE -> $IMAGE_TAG"
-
             sed -i -E 's#(^\\s*tag:\\s*).*#\\1"'$IMAGE_TAG'"#' "$DEV_VALUES_FILE"
 
             echo "✅ File updated. Here's the result:"
@@ -242,11 +231,12 @@ pipeline {
 
   post {
     success {
-      echo '✅ Pipeline completed successfully. Docker image pushed and GitOps repo updated.'
+      echo '✅ Pipeline completed successfully. Image pushed and GitOps updated.'
     }
     failure {
       echo '❌ Pipeline failed. Check above logs.'
     }
   }
 }
+
 
