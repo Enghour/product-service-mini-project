@@ -1,15 +1,15 @@
 spring:
   application:
-    name:
-      jpa-hibernate-02_homework
+    name: jpa-hibernate-02_homework
   datasource:
-    url: jdbc:postgresql://localhost:5435/product
+    url: jdbc:postgresql://my-postgres-postgresql.product-service.svc.cluster.local:5432/mydb
+    username: myuser
     password: 123
-    username: postgres
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
         format_sql: true
