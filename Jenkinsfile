@@ -153,20 +153,20 @@ pipeline {
       }
     }
 
-    stage('Build Spring Boot') {
-      steps {
-        sh '''
-          # ✅ Use the installed system JDK 21 explicitly
-          export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
-          export PATH=$JAVA_HOME/bin:$PATH
-          export ORG_GRADLE_JAVA_INSTALLATIONS_PATHS=$JAVA_HOME
+    // stage('Build Spring Boot') {
+    //   steps {
+    //     sh '''
+    //       # ✅ Use the installed system JDK 21 explicitly
+    //       export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+    //       export PATH=$JAVA_HOME/bin:$PATH
+    //       export ORG_GRADLE_JAVA_INSTALLATIONS_PATHS=$JAVA_HOME
 
-          echo "✅ Using JAVA_HOME=$JAVA_HOME"
-          chmod +x ./gradlew || true
-          ./gradlew clean build -x test
-        '''
-      }
-    }
+    //       echo "✅ Using JAVA_HOME=$JAVA_HOME"
+    //       chmod +x ./gradlew || true
+    //       ./gradlew clean build -x test
+    //     '''
+    //   }
+    // }
 
     stage('Build & Push Docker image') {
       steps {
