@@ -163,7 +163,8 @@ pipeline {
     stage('Build & Push Docker image') {
       steps {
         script {
-          def imageTag = "${BASE_VERSION}.${env.BUILD_NUMBER}"
+          // 👇 Create a three-part version string like 1.0.13
+          def imageTag = "1.0.${env.BUILD_NUMBER}"
           env.IMAGE_TAG = imageTag
     
           echo "📦 Building image: ${DOCKER_HUB_REPO}:${imageTag}"
@@ -177,6 +178,7 @@ pipeline {
         }
       }
     }
+
 
 
     // stage('Trivy scan (image)') {
