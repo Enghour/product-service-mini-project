@@ -38,6 +38,11 @@ pipeline {
 
     stage('Build & Push Docker image') {
       steps {
+        sh '''
+          whoami
+          groups
+          docker ps
+        '''
         script {
           def shortSha = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
           def imageTag = "${BASE_VERSION}.${env.BUILD_NUMBER}-${shortSha}"
