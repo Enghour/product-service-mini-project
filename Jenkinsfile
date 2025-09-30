@@ -163,13 +163,12 @@ pipeline {
     stage('Build & Push Docker image') {
       steps {
         script {
-          def shortSha = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
-          def imageTag = "${BASE_VERSION}.${env.BUILD_NUMBER}-${shortSha}"
+          def imageTag = "${BASE_VERSION}.${env.BUILD_NUMBER}"
           env.IMAGE_TAG = imageTag
-
+    
           echo "📦 Building image: ${DOCKER_HUB_REPO}:${imageTag}"
           def img = docker.build("${DOCKER_HUB_REPO}:${imageTag}")
-
+    
           echo "🚀 Pushing image to Docker Hub"
           docker.withRegistry('', DOCKER_HUB_CREDENTIALS_ID) {
             img.push(imageTag)
@@ -178,6 +177,7 @@ pipeline {
         }
       }
     }
+
 
     // stage('Trivy scan (image)') {
     //   steps {
