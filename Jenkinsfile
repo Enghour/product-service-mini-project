@@ -151,14 +151,14 @@ pipeline {
       }
     }
 
-    // stage('Build Spring Boot') {
-    //   steps {
-    //     sh '''
-    //       chmod +x ./gradlew || true
-    //       ./gradlew clean build -x test
-    //     '''
-    //   }
-    // }
+    stage('Build Spring Boot') {
+      steps {
+        sh '''
+          chmod +x ./gradlew || true
+          ./gradlew clean build -x test
+        '''
+      }
+    }
 
     stage('Build & Push Docker image') {
       steps {
