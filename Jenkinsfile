@@ -123,18 +123,18 @@
 // }
 
 pipeline {
-  agent { label "agent-2" }
+  agent { label "worker-agent-1" }
 
   environment {
     // Credentials (Jenkins will expose *_USR and *_PSW vars)
-    DOCKERHUB = credentials('docker-hub-credentials')
-    GITHUB = credentials('github-jenkins-tahourdev')
+    DOCKERHUB = credentials('dockerhub-cred')
+    GITHUB = credentials('github-cred')
 
     // App image & CD repo settings
-    APP_IMAGE_REPO   = 'docker.io/keanghor31/product-service'
-    CD_REPO_URL      = 'https://github.com/tahourdev/cd-product-service.git'
+    APP_IMAGE_REPO   = 'docker.io/keanghor31/spring-app01'
+    CD_REPO_URL      = 'https://github.com/Enghour/product-service-cd.git'
     CD_REPO_BRANCH   = 'main'
-    CHART_PATH       = 'charts/product-service'  // path within Repo B
+    CHART_PATH       = '.'  // path within Repo B
   }
 
   options {
@@ -177,8 +177,8 @@ pipeline {
       steps {
         dir('cd-repo') {
           sh '''
-            git config --global user.email "enghourheng26@gmail.com"
-            git config --global user.name  "tahourdev"
+            git config --global user.email "enghourh5@gmail.com"
+            git config --global user.name  "Enghour"
 
             # Clone Repo B with embedded credentials (HTTPS)
             CLONE_URL="${CD_REPO_URL#https://}"
